@@ -1,11 +1,12 @@
 {
   "name": "desi-tweet-generator",
   "version": "1.0.0",
-  "description": "Generate viral Hinglish tweets with sarcasm",
+  "description": "Generate viral Hinglish tweets with sarcasm using Google Gemini API",
   "main": "index.html",
   "scripts": {
     "dev": "vercel dev",
-    "build": "echo 'No build needed'"
+    "build": "echo 'No build needed'",
+    "start": "vercel dev"
   },
   "keywords": [
     "twitter",
@@ -13,8 +14,11 @@
     "viral",
     "tweets",
     "indian",
-    "sarcasm"
+    "sarcasm",
+    "gemini",
+    "ai"
   ],
-  "author": "Your Name",
-  "license": "MIT"
+  "author": "Manan Jain",
+  "license": "MIT",
+  "dependencies": {}
 }
