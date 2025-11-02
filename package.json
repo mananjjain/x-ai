@@ -1,0 +1,20 @@
+{
+  "name": "desi-tweet-generator",
+  "version": "1.0.0",
+  "description": "Generate viral Hinglish tweets with sarcasm",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build needed'"
+  },
+  "keywords": [
+    "twitter",
+    "hinglish",
+    "viral",
+    "tweets",
+    "indian",
+    "sarcasm"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
