@@ -1,17 +1,29 @@
-// Serverless function for Vercel
-// This will handle API calls without CORS issues
+// ✅ Serverless Edge Function for Vercel
+// Handles Gemini API calls for Desi Tweet Generator 🔥
 
-export default async function handler(req, res) {
-  // Only allow POST requests
+export const config = {
+  runtime: 'edge',
+};
+
+export default async (req) => {
+  // Allow only POST requests
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
-  const { topic, apiKey } = req.body;
+  // Parse request body
+  const body = await req.json();
+  const { topic, apiKey } = body;
 
   // Validate inputs
   if (!topic || !apiKey) {
-    return res.status(400).json({ error: 'Topic aur API key dono chahiye!' });
+    return new Response(JSON.stringify({ error: 'Topic aur API key dono chahiye!' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   const prompt = `You are an elite Indian Twitter content creator. Generate exactly 10 viral Hinglish tweets on the topic: "${topic}". 
@@ -37,28 +49,24 @@ Just give me 10 numbered tweets, nothing else. No explanations, no style labels,
 
   try {
     // Call Gemini API
-    const response = await fetch(
+    const geminiResponse = await fetch(
       `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{
-            parts: [{ text: prompt }]
-          }],
+          contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
             temperature: 0.9,
             maxOutputTokens: 1024,
-          }
-        })
+          },
+        }),
       }
     );
 
-    const data = await response.json();
+    const data = await geminiResponse.json();
 
-    if (!response.ok) {
+    if (!geminiResponse.ok) {
       throw new Error(data.error?.message || 'Gemini API error');
     }
 
@@ -70,22 +78,25 @@ Just give me 10 numbered tweets, nothing else. No explanations, no style labels,
 
     // Parse tweets from numbered list
     const tweetMatches = generatedText.match(/^\d+\.\s*(.+)$/gm);
-    
-    if (!tweetMatches || tweetMatches.length === 0) {
+    const tweets = tweetMatches?.map((line) => line.replace(/^\d+\.\s*/, '').trim()) || [];
+
+    if (tweets.length === 0) {
       throw new Error('Could not parse tweets');
     }
 
-    const tweets = tweetMatches.map(match => 
-      match.replace(/^\d+\.\s*/, '').trim()
-    );
-
-    // Return tweets
-    return res.status(200).json({ tweets });
-
-  } catch (error) {
-    console.error('Error:', error);
-    return res.status(500).json({ 
-      error: error.message || 'Kuch gadbad ho gayi bhai!' 
+    // Success ✅
+    return new Response(JSON.stringify({ tweets }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
     });
+  } catch (error) {
+    // Error handling
+    return new Response(
+      JSON.stringify({ error: error.message || 'Kuch gadbad ho gayi bhai!' }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
-}
+};
